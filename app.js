@@ -4,7 +4,7 @@ app.controller('GoBoardController', function($scope){
 
 //GLOBAL VARIABLES
 	$scope.globalVar = {
-		boardLength: 6,			//GLOBAL set boardLength
+		boardLength: 13,			//GLOBAL set boardLength
 		turnNumber: 1,			//turn counter(used to switch player)
 		turnColor: 'black',
 		oppositeTurnColor: 'white',
