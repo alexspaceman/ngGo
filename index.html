@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app="app">
+	<head>
+		<title>Go Testes</title>
+
+		<!-- DEPENDENCIES -->
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
+		<link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="common.css">
+
+		<!-- APP -->
+		<script src="app.js"></script>
+
+	</head>
+
+	<body>
+
+		<!-- GOTRY -->
+		<div ng-controller="GoBoardController">
+
+		<div class="hud">
+			<h5>TURN # {{globalVar.turnNumber}} : {{globalVar.turnColor}}</h5>
+
+			<input type="button" value="pass" ng-click="pass()">
+		</div>
+
+			<div class="board">
+				<div ng-repeat="row in goBoard">
+					<span ng-repeat="cell in row" 
+					id="{{cell.idNum}}" 
+					class="space {{cell.idNum}} {{cell.colorStatus}} {{cell.boardCornerSide}} {{cell.mouseOverStatus}} {{cell.lastMoveStatus}}"
+					ng-mouseenter="cell.mouseOverStatus = 'mouseOver'" 
+					ng-mouseleave="cell.mouseOverStatus = ''"
+					ng-mouseup="mouseUpFunction(cell, $parent.$index, $index)">
+						<div>ID:{{cell.idNum}}</div>
+						<div>{{cell.cellRow}} - {{cell.cellCol}}</div>
+						<div>{{cell.boardCornerSide}}</div>
+					</span>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
