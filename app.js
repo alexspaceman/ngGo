@@ -33,6 +33,7 @@ app.controller('GoBoardController', function($scope){
 		if($scope.globalVar.passCounter == 2){
 			alert('BOTH PLAYERS PASS' + '\n' + 'count your territory and add it to your score'+ '\n' +
 				'autoCounter NOT YET IMPLEMENTED!');
+			
 		}
 	}
 
