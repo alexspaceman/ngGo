@@ -4,8 +4,8 @@ app.controller('GoBoardController', function($scope){
 
 //GLOBAL VARIABLES
 	$scope.globalVar = {
-		boardLength: 13,			//GLOBAL set boardLength
-		turnNumber: 1,			//turn counter(used to switch player)
+		boardLength: 6,				//GLOBAL set boardLength
+		turnNumber: 1,				//turn counter(used to switch player)
 		turnColor: 'black',
 		oppositeTurnColor: 'white',
 		colorStatus: '',
@@ -18,7 +18,8 @@ app.controller('GoBoardController', function($scope){
 		whiteScore: 0,
 		passCounter: 0,
 		piecesTakenThisTurn: 0,
-		idsTakenThisTurn: []
+		idsTakenThisTurn: [],
+		turnHistory: []				//chaches goBoard every turn
 	}
 
 //PASS EVENT
@@ -26,10 +27,116 @@ app.controller('GoBoardController', function($scope){
 		$scope.globalVar.turnColor = oppositeTurnColor($scope.globalVar.turnColor);
 		$scope.globalVar.turnNumber++;
 		$scope.globalVar.passCounter++;
+
+		$scope.globalVar.turnHistory = saveBoardState($scope.goBoard, $scope.globalVar.turnHistory);
+
 		if($scope.globalVar.passCounter == 2){
-			alert('BOTH PLAYERS PASS' + '\n' + 'count your territory and add it to your score');
+			alert('BOTH PLAYERS PASS' + '\n' + 'count your territory and add it to your score'+ '\n' +
+				'autoCounter NOT YET IMPLEMENTED!');
 		}
 	}
+
+//goBoard GAME HISTORY
+	function saveBoardState(goBoard, turnHistory){
+		//alert('turnNumber : ' + $scope.globalVar.turnNumber + '\n' +
+		//	'turnHistory.length : ' + turnHistory.length);
+		var currentTurn = [];
+
+		if($scope.globalVar.turnNumber - 2 <= turnHistory.length){
+			for(var i = 0; i < $scope.goBoard.length; i++){
+				for(var j = 0; j < $scope.goBoard[i].length; j++){
+					if($scope.goBoard[i][j].colorStatus == 'emptySpot'){
+						currentTurn.push('emptySpot');
+					}else if($scope.goBoard[i][j].colorStatus == 'black'){
+						currentTurn.push('black');
+					}else if($scope.goBoard[i][j].colorStatus == 'white'){
+						currentTurn.push('white');
+					}
+				}
+			}
+			//alert(currentTurn);
+			turnHistory.push(currentTurn);
+			//alert(turnHistory);
+		}else{
+			alert('turns out of whack!');
+		}
+		return turnHistory;
+	}
+
+//goBack EVENT
+	$scope.goBack = function(){
+		if($scope.globalVar.turnHistory.length == 1){
+			$scope.resetBoard();		//first turn
+		}else if($scope.globalVar.turnHistory.length == 0){
+			alert('already at the beginning');
+		}else{
+			alert('NEED TO CHANGE THE BOARD!');
+			var gridSize = $scope.globalVar.boardLength * $scope.globalVar.boardLength;
+			var targetTurn = $scope.globalVar.turnHistory.length - 2;
+			//alert('gridSize: ' + gridSize + '\n' + 'targetTurn: ' + targetTurn);
+
+			var targetBoard = [];
+			var boardIdNum = 0;
+			for(var i = 0; i < gridSize; i++){
+				//alert($scope.globalVar.turnHistory[targetTurn][boardIdNum]);
+				targetBoard.push($scope.globalVar.turnHistory[targetTurn][boardIdNum]);
+				boardIdNum++;
+			}
+
+			boardIdNum = 0;
+
+			for(var i = 0; i < $scope.goBoard.length; i++){
+				for(var j = 0; j < $scope.goBoard[i].length; j++){
+					$scope.goBoard[i][j].colorStatus = targetBoard[boardIdNum];
+					boardIdNum++;
+				}
+			}
+
+			$scope.globalVar.turnNumber--;
+			$scope.globalVar.turnColor = oppositeTurnColor($scope.globalVar.turnColor);
+			$scope.globalVar.turnHistory.pop();
+		}
+	}
+
+//resetBoard EVENT
+	$scope.resetBoard = function(){
+		for(var i = 0; i < $scope.goBoard.length; i++){
+			for(var j = 0; j < $scope.goBoard[i].length; j++){
+				$scope.goBoard[i][j].colorStatus = 'emptySpot';
+			}
+		}
+		$scope.globalVar.turnNumber = 1;
+		$scope.globalVar.whiteScore = 0;
+		$scope.globalVar.blackScore = 0;
+		$scope.globalVar.turnColor = 'black';
+		$scope.globalVar.turnHistory = [];
+		alert('board reset');
+	}
+
+//HAVE TO SAVE ALL DEPENDENCIES AS FILES IN THE FOLDER (no more CDN bullshit)
+
+
+//HAVE TO MAKE A COUNTING MODE...
+
+//GETS TRIGGERED IN THE BOTH PLAYERS PASS if()
+//NOW THE RECURSION CHECKS THE WHOLE goBoard FOR 'emptySpot's
+//IF IT FINDS BOTH BLACK AND WHITE PIECES ATTACHED TO STRINGS OF 'emptySpot's
+//DOES NOTHING
+//IF IT FINDS ONLY ONE COLOR
+//IT ADDS THE NUMBER OF 'emptySpot's IN THAT CHAIN TO THAT COLORS SCORE
+
+//FOR NOW THE PLAYERS MUST HAVE NO ENEMY PIECES IN THEIR TERRITORY FOR THIS TO WORK
+
+
+//HAVE TO MAKE AN AFTER GAME DELETION MODE...
+
+//BUT I CAN INCLUDE AN AFTER GAME DELETION MODE WHERE PLAYERS HIGHLIGHT OFFENDING
+//PIECES TO BE DELETED FROM THEIR TERRITORY
+//IF BOTH PLAYERS PRESS AN ACCEPT BUTTON
+//THOSE HIGHLIGHTED PIECES GET DELETED AND ADDED TO THE APPROPRIATE SCORE COUNTERS
+//NOW THE AUTO COUNTER WILL WORK JUST FINE
+
+
 
 //MOUSE UP EVENT
 	$scope.mouseUpFunction = function(cell, row, col){
@@ -62,6 +169,8 @@ app.controller('GoBoardController', function($scope){
 			$scope.globalVar.turnNumber++;
 			$scope.globalVar.passCounter = 0;
 			$scope.globalVar.piecesTakenThisTurn = 0;
+
+			$scope.globalVar.turnHistory = saveBoardState($scope.goBoard, $scope.globalVar.turnHistory);
 		}
 	}
 
