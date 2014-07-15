@@ -38,8 +38,6 @@ app.controller('GoBoardController', function($scope){
 
 //goBoard GAME HISTORY
 	function saveBoardState(goBoard, turnHistory){
-		//alert('turnNumber : ' + $scope.globalVar.turnNumber + '\n' +
-		//	'turnHistory.length : ' + turnHistory.length);
 		var currentTurn = [];
 
 		if($scope.globalVar.turnNumber - 2 <= turnHistory.length){
@@ -54,9 +52,7 @@ app.controller('GoBoardController', function($scope){
 					}
 				}
 			}
-			//alert(currentTurn);
 			turnHistory.push(currentTurn);
-			//alert(turnHistory);
 		}else{
 			alert('turns out of whack!');
 		}
@@ -70,15 +66,12 @@ app.controller('GoBoardController', function($scope){
 		}else if($scope.globalVar.turnHistory.length == 0){
 			alert('already at the beginning');
 		}else{
-			alert('NEED TO CHANGE THE BOARD!');
 			var gridSize = $scope.globalVar.boardLength * $scope.globalVar.boardLength;
 			var targetTurn = $scope.globalVar.turnHistory.length - 2;
-			//alert('gridSize: ' + gridSize + '\n' + 'targetTurn: ' + targetTurn);
-
 			var targetBoard = [];
 			var boardIdNum = 0;
+
 			for(var i = 0; i < gridSize; i++){
-				//alert($scope.globalVar.turnHistory[targetTurn][boardIdNum]);
 				targetBoard.push($scope.globalVar.turnHistory[targetTurn][boardIdNum]);
 				boardIdNum++;
 			}
@@ -179,7 +172,7 @@ app.controller('GoBoardController', function($scope){
 		if($scope.globalVar.piecesTakenThisTurn == 1){
 			//alert('you cant play on id#' + $scope.globalVar.idsTakenThisTurn[0]);
 		}else{
-			$scope.globalVar.idsTakenThisTurn = [];
+			$scope.globalVar.idsTakenThisTurn = [];	//clear the list of pieces if more than 1
 		}
 	}
 
