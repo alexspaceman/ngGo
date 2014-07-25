@@ -18,9 +18,14 @@ app.controller('GoBoardController', function($scope){
 		whiteScore: 0,
 		passCounter: 0,
 		piecesTakenThisTurn: 0,
+		blackCounterFlag: false,
+		whiteCounterFlag: false,
 		idsTakenThisTurn: [],
-		turnHistory: []				//chaches goBoard every turn
+		turnHistory: [],				//chaches goBoard every turn
+		pointsAddedCounter: 0,
+		coloredCheckedPieces: []
 	}
+
 
 //PASS EVENT
 	$scope.pass = function () {
@@ -32,8 +37,92 @@ app.controller('GoBoardController', function($scope){
 
 		if($scope.globalVar.passCounter == 2){
 			alert('BOTH PLAYERS PASS' + '\n' + 'count your territory and add it to your score'+ '\n' +
-				'autoCounter NOT YET IMPLEMENTED!');
-			
+				'autoCounter WORK IN PROGRESS');
+			resetCheckedStatus($scope.goBoard);		//might not be necessary
+			territoryCounter();
+		}
+	}
+
+//TERRITORY COUNTER FUNCTION
+	function territoryCounter(){
+		alert('territoryCounter()');
+		for(var i = 0; i < $scope.goBoard.length; i++){
+			for(var j = 0; j < $scope.goBoard[i].length ; j++){
+				if($scope.goBoard[i][j].checkedStatus == false){
+					$scope.goBoard[i][j].checkedStatus = true;
+					if($scope.goBoard[i][j].colorStatus == 'emptySpot'){
+						$scope.globalVar.pointsAddedCounter = 1;	//reset the counter, but add a point
+						checkTerritory($scope.goBoard[i][j], $scope.globalVar.boardLength);
+					}else{				//reset counter when you hit black or white. may not be necessary
+						$scope.globalVar.pointsAddedCounter = 0;
+						($scope.globalVar.coloredCheckedPieces).push($scope.goBoard[i][j]);
+					}
+				}else{	//NOT TRIGGERING ALL THE TIME
+					alert('DONEZO  - pointsAddedCounter: ' + $scope.globalVar.pointsAddedCounter);
+					if($scope.globalVar.blackCounterFlag == true && $scope.globalVar.whiteCounterFlag == true){
+						alert('no points for this emptySpot chain');
+					}else if($scope.globalVar.blackCounterFlag == true && $scope.globalVar.whiteCounterFlag == false){
+						alert('points for black!' + $scope.globalVar.pointsAddedCounter);
+						$scope.globalVar.blackScore += $scope.globalVar.pointsAddedCounter;
+					}else if($scope.globalVar.blackCounterFlag == false && $scope.globalVar.whiteCounterFlag == true){
+						alert('points for white!' + $scope.globalVar.pointsAddedCounter);
+						$scope.globalVar.whiteScore += $scope.globalVar.pointsAddedCounter;
+					}else if($scope.globalVar.blackCounterFlag == false && $scope.globalVar.whiteCounterFlag == false){
+						alert('no points for this emptySpot chain');
+					}
+
+					for(var k = 0; k < $scope.globalVar.coloredCheckedPieces.length; k++){
+						alert($scope.globalVar.coloredCheckedPieces[k].colorStatus);
+						$scope.globalVar.coloredCheckedPieces[k].checkedStatus = false;
+					}
+					$scope.globalVar.coloredCheckedPieces = [];
+
+					$scope.globalVar.pointsAddedCounter = 0;
+					$scope.globalVar.blackCounterFlag = false;
+					$scope.globalVar.whiteCounterFlag = false;
+
+				}
+			}
+		}
+	}
+
+//TERRITORY CHECKERS AND RECURSIONS
+	function checkTerritory(cell, boardLength){
+		alert('checkTerritory()');
+		alert($scope.globalVar.pointsAddedCounter);
+
+		if(cell.cellRow > 1){
+			var focusPiece = $scope.goBoard[(cell.cellRow-2)][cell.cellCol-1];
+			territoryCheckRecursion(focusPiece, cell, boardLength);
+		}
+		if(cell.cellCol > 1){
+			var focusPiece = $scope.goBoard[(cell.cellRow-1)][cell.cellCol-2];
+			territoryCheckRecursion(focusPiece, cell, boardLength);
+		}
+		if(cell.cellCol < boardLength){
+			var focusPiece = $scope.goBoard[(cell.cellRow-1)][cell.cellCol];
+			territoryCheckRecursion(focusPiece, cell, boardLength);
+		}
+		if(cell.cellRow < boardLength){
+			var focusPiece = $scope.goBoard[(cell.cellRow)][cell.cellCol-1];
+			territoryCheckRecursion(focusPiece, cell, boardLength);
+		}
+	}
+
+	function territoryCheckRecursion(focusPiece, cell, boardLength){
+		alert('should be checking ' + cell.idNum + '\n' + 'and focusing on ' + focusPiece.idNum + '\n' +
+			'cell.colorStatus: ' + cell.colorStatus + '\n' + 'focusPiece.colorStatus: ' + focusPiece.colorStatus);
+		if(focusPiece.checkedStatus == false){
+			focusPiece.checkedStatus = true;
+			if(focusPiece.colorStatus == 'black'){
+				$scope.globalVar.blackCounterFlag = true;
+				($scope.globalVar.coloredCheckedPieces).push(focusPiece);
+			}else if(focusPiece.colorStatus == 'white'){
+				$scope.globalVar.whiteCounterFlag = true;
+				($scope.globalVar.coloredCheckedPieces).push(focusPiece);
+			}else{
+				checkTerritory(focusPiece, boardLength);
+			}
 		}
 	}
 
@@ -53,6 +142,9 @@ app.controller('GoBoardController', function($scope){
 					}
 				}
 			}
+			currentTurn.push($scope.globalVar.blackScore);
+			currentTurn.push($scope.globalVar.whiteScore);			
+
 			turnHistory.push(currentTurn);
 		}else{
 			alert('turns out of whack!');
@@ -86,6 +178,9 @@ app.controller('GoBoardController', function($scope){
 				}
 			}
 
+			$scope.globalVar.blackScore = $scope.globalVar.turnHistory[targetTurn][gridSize];
+			$scope.globalVar.whiteScore = $scope.globalVar.turnHistory[targetTurn][gridSize+1];
+
 			$scope.globalVar.turnNumber--;
 			$scope.globalVar.turnColor = oppositeTurnColor($scope.globalVar.turnColor);
 			$scope.globalVar.turnHistory.pop();
@@ -108,6 +203,7 @@ app.controller('GoBoardController', function($scope){
 	}
 
 //HAVE TO SAVE ALL DEPENDENCIES AS FILES IN THE FOLDER (no more CDN bullshit)
+//BOOTSTRAP IS STILL IN CDN FORMAT!!! FIX IT
 
 
 //HAVE TO MAKE A COUNTING MODE...
@@ -145,7 +241,8 @@ app.controller('GoBoardController', function($scope){
 			if($scope.globalVar.idsTakenThisTurn[0] == cell.idNum){
 				alert('illegal move, play again');
 				cell.colorStatus = 'emptySpot';
-				$scope.globalVar.turnNumber--;
+				$scope.globalVar.turnHistory.pop();	//pop out the last turnHistory
+				$scope.globalVar.turnNumber--;		//	since it will save a new turn anyway later
 			}else{
 				$scope.globalVar.idsTakenThisTurn = [];			//reset the idsTakenThisTurn
 				resetCheckedStatus($scope.goBoard);
@@ -231,6 +328,7 @@ app.controller('GoBoardController', function($scope){
 		if($scope.globalVar.anyEmptyCounter == 0){
 			alert('illegal move, play again');
 			cell.colorStatus = 'emptySpot';
+			$scope.globalVar.turnHistory.pop();
 			$scope.globalVar.turnNumber--;
 			$scope.globalVar.turnColor = oppositeTurnColor($scope.globalVar.turnColor);
 		}
